@@ -194,7 +194,6 @@ def remove_upload_file(stored_filename):
 # -------- ROUTES --------
 
 @app.route("/")
-@app.route("/")
 def index():
     db = get_db()
     user_id = session.get("user_id")
@@ -517,7 +516,6 @@ def delete_post(post_id):
     flash("Post deleted.", "success")
     return redirect(url_for("index"))
 
-@app.route("/profile/")
 @app.route("/profile/<username>")
 def profile(username=None):
     if username is None:
