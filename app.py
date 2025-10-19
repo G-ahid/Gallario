@@ -3,7 +3,9 @@
 # =============================================================================
 # This is a social media-style image sharing application built with Flask.
 # Features: User registration/login, image uploads, likes/dislikes, comments,
-# notifications, and user profiles.
+# notifications, and user profiles with editable descriptions.
+
+# Made by Nezar Bahid @ AUI 
 # =============================================================================
 
 # Standard library imports
@@ -28,9 +30,11 @@ from PIL import Image  # Image processing (resize, crop, etc.)
 # APPLICATION CONFIGURATION
 # =============================================================================
 # Initialize Flask application
+sharingOnLocalNetwork = False
+
 app = Flask(__name__)
 # Secret key for session management and security
-app.secret_key = "03c7456gt529wd3p;98/.,x32xwxw62edfff5"
+app.secret_key = "F18029BD1E955FB23095506A7223710A90B5F43E1F57442EB3ECC8D704B8554D"
 
 # Get the directory where this script is located
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -919,8 +923,9 @@ if __name__ == "__main__":
     - port=8080 is the server port
     - debug=True enables auto-reload and detailed error pages
     """
-    # For local development only:
-    # app.run(port=8080, debug=True)
-    
-    # For network access (development/testing):
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    if sharingOnLocalNetwork:
+        # For network access (development/testing):
+        app.run(host="0.0.0.0", port=8080, debug=True)
+    else:
+        # For local development only:
+        app.run(port=8080, debug=True)
