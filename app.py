@@ -10,7 +10,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from PIL import Image
 
- 
 
 # -------- CONFIG --------
 app = Flask(__name__)
@@ -95,7 +94,7 @@ def init_db():
     CREATE TABLE IF NOT EXISTS dms (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER,
-        reciever_id INTEGER,
+        receiever_id INTEGER,
         message_id INTEGER,
         value TEXT,
         UNIQUE(user_id, message_id),
@@ -636,6 +635,7 @@ def get_notifications():
         data.append(item)
 
     return jsonify(success=True, notifications=data)
+
 
 @app.route("/notifications/<int:notif_id>/seen", methods=["POST"])
 def mark_notification_seen(notif_id):
