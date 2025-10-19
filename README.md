@@ -68,17 +68,23 @@ A modern, feature-rich social media platform built with Flask that allows users 
 5. **Open your browser**
    Navigate to `http://localhost:8080`
 
-## 📋 Requirements
-
-Create a `requirements.txt` file with the following dependencies:
-
+## Or if you have Linux(very cool)
+just run this in whatever folder you want :
 ```
-Flask==2.3.3
-Pillow==10.0.1
-Werkzeug==2.3.7
+sudo apt update
+sudo apt install python3
+sudo apt install python3-flask
+sudo apt install python3-pillow
+sudo apt install python3-werkzeug
+git clone https://github.com/yourusername/ImageServer.git
+cd ImageServer
+python3 app.py
 ```
+Then you can see the ip adress on the terminal, type the same thing into any other device that is also connected to the same network.
+## Requirement
+Have Python and download all the libraries from `requirements.txt` file.
 
-## 🏗️ Project Structure
+##  Project Structure
 
 ```
 ImageServer/
@@ -102,7 +108,7 @@ ImageServer/
     └── side.html        # Notification sidebar
 ```
 
-## 🗄️ Database Schema
+## Database Schema
 
 The application uses SQLite with the following tables:
 
@@ -110,27 +116,30 @@ The application uses SQLite with the following tables:
 - **posts** - Image posts with captions
 - **likes** - User reactions (like/dislike system)
 - **comments** - Post comments
-- **notifications** - User notifications
+- **notifications** - User notifications(not implemented yet)
 - **dms** - Direct messages (future feature)
 
 ## 🔧 Configuration
 
-### Network Access
+### Ternimal Running
 Edit `app.py` to control network access:
 
-```python
-sharingOnLocalNetwork = False  # Set to True for network access
+```bash
+python3 app.py --port 5000 --notlan
+```
+```
+options:
+  -h, --help   show this help message and exit
+  --port PORT  Port number to run on the web app.
+  --notlan     Set it to True if you want to test it on other devices that
+               are also connected to the local network.
 ```
 
-- `False` - Local access only (`localhost:8080`)
-- `True` - Network access (`0.0.0.0:8080`)
 
 ### Security
 - Change the `app.secret_key` in production
 - Use environment variables for sensitive data
 - Consider using HTTPS in production
-
-## 🎯 Usage
 
 ### For Users
 1. **Register** - Create a new account with username and password
@@ -146,7 +155,7 @@ sharingOnLocalNetwork = False  # Set to True for network access
 - **Database Migrations** - Automatic schema updates
 - **Error Handling** - Graceful error management
 
-## 🛠️ Development
+## Development
 
 ### Adding New Features
 1. Create new routes in `app.py`
@@ -159,15 +168,12 @@ The app automatically handles database migrations. For new tables:
 1. Add table creation in `init_db()` function
 2. The app will create tables on startup
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
 **Port already in use**
-```bash
-# Change port in app.py or kill existing process
-lsof -ti:8080 | xargs kill -9
-```
+Kill the Python... in Terminal.
 
 **Database errors**
 ```bash
@@ -179,7 +185,7 @@ rm database.db
 - Check file permissions on `static/uploads/` and `static/avatars/`
 - Ensure allowed file extensions match your uploads
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -187,20 +193,20 @@ rm database.db
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👨‍💻 Author
+## Author(me)
 
 **Nezar Bahid**
 - Email: n.bahid@aui.ma
 - Institution: Al Akhawayn University (AUI)
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Flask community for the excellent framework
-- Contributors and testers
+- Contributors and testers(Chatgpt and Cursor and maybe Gemini)
 - Open source libraries used in this project
 
 ---

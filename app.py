@@ -9,10 +9,11 @@
 # =============================================================================
 
 # Standard library imports
+import argparse              # Argument passing through terminal
 import os                    # File system operations
-import sqlite3              # Database operations
-import uuid                 # Generate unique identifiers
-from datetime import datetime  # Date/time handling
+import sqlite3               # Database operations
+import uuid                  # Generate unique identifiers
+from datetime import datetime# Date/time handling
 
 # Flask framework imports
 from flask import (
@@ -30,7 +31,10 @@ from PIL import Image  # Image processing (resize, crop, etc.)
 # APPLICATION CONFIGURATION
 # =============================================================================
 # Initialize Flask application
-sharingOnLocalNetwork = False
+parser = argparse.ArgumentParser(description="ImageServer - Social Media Image Sharing Platform")
+parser.add_argument("--port", type=int, default=8080, help="Port number to run on the web app.")
+parser.add_argument("--notlan", action="store_false", default=True, help="Set it to True if you want to test it on other devices that are also connected to the local network.")
+arg = parser.parse_args()
 
 app = Flask(__name__)
 # Secret key for session management and security
@@ -919,13 +923,13 @@ def mark_notification_seen(notif_id):
 if __name__ == "__main__":
     """
     Start the Flask development server.
-    - host="0.0.0.0" allows external connections (for testing on network)
-    - port=8080 is the server port
+    - host="0.0.0.0" allows external connections (for testing on network) also can be turned off in terminal
+    - port=8080 is the server port unless changed on the Terminal
     - debug=True enables auto-reload and detailed error pages
     """
-    if sharingOnLocalNetwork:
-        # For network access (development/testing):
-        app.run(host="0.0.0.0", port=8080, debug=True)
-    else:
+    if arg.notlan:
         # For local development only:
-        app.run(port=8080, debug=True)
+        app.run(port=arg.port, debug=True)
+    else:
+        # For network access (development/testing):
+        app.run(host="0.0.0.0", port=arg.port, debug=True)
