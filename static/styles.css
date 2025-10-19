@@ -424,7 +424,26 @@ h1, h2, h3 {
   padding: 16px;             /* Space inside the box */
   background: #121212;       /* Background color inside the div */
   color: #fff;                /* Text color */
-  width: 300px;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.no-posts {
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 2rem;
+  margin: 1rem 0;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px dashed var(--text-muted);
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  box-sizing: border-box;
 }
 /* ===========================
    Responsive Tweaks

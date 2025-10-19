@@ -28,10 +28,11 @@ DB_PATH = os.path.join(BASE_DIR, "database.db")
 
 # -------- DB HELPERS --------
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
     conn.row_factory = sqlite3.Row
+    # Enforce foreign key constraints
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn
-
 def ensure_likes_value_column(conn):
     """If likes table exists but lacks 'value' column, add it."""
     info = conn.execute("PRAGMA table_info(likes)").fetchall()
@@ -144,22 +145,29 @@ def crop_to_square(img):
 
 def save_avatar_file(file_storage):
     if not file_storage or file_storage.filename == "":
-        return None 
+        return None
     if not allowed_file(file_storage.filename):
-        return None                                 # Generate safe and unique filename
-    filename = secure_filename(file_storage.filename)
-    unique = f"{uuid.uuid4().hex}_{filename}"
-    full_path = os.path.join(AVATAR_FOLDER, unique) # Ensure the folder exists
+        return None
+
+    # Make sure avatars folder exists
     os.makedirs(AVATAR_FOLDER, exist_ok=True)
-    # Open and process the image
-    img = Image.open(file_storage)
-    # Convert to RGB to avoid errors with PNG transparency
+
+    # Create a unique png filename
+    unique_name = f"{uuid.uuid4().hex}.png"
+    full_path = os.path.join(AVATAR_FOLDER, unique_name)
+
+    # Open image from the FileStorage stream
+    img = Image.open(file_storage.stream)
+    # Convert to RGB to avoid issues with alpha/transparency if you want opaque avatars.
     img = img.convert("RGB")
-    # Crop to square and resize to exactly 256x256
     img = crop_to_square(img)
     img = img.resize((256, 256), Image.LANCZOS)
-    # Save the resized avatar
-    img.save(full_path, format="PNG")
+    # Save as PNG (consistent file type)
+    img.save(full_path, format="PNG", optimize=True)
+
+    # Return a relative path that matches how you store avatars in DB
+    return f"avatars/{unique_name}"
+
 
     return f"avatars/{unique}"  # Relative path to use with url_for
 
@@ -446,21 +454,23 @@ def add_comment(post_id):
     if text == "":
         flash("Comment cannot be empty.", "error")
         return redirect(url_for("view_post", post_id=post_id))
-
+        
     db = get_db()
-    cur = db.execute("INSERT INTO comments (post_id, user_id, text) VALUES (?, ?, ?)", (post_id, user["id"], text))
+    cur = db.execute(
+        "INSERT INTO comments (post_id, user_id, text) VALUES (?, ?, ?)",
+        (post_id, user["id"], text)
+    )
     comment_id = cur.lastrowid
     post = db.execute("SELECT user_id FROM posts WHERE id = ?", (post_id,)).fetchone()
-    if post and post["user_id"] != user["id"]:  # don't notify yourself
+    if post and post["user_id"] != user["id"]:
         db.execute("""
             INSERT INTO notifications (maker_id, receiver_id, type, reference_id, comment_id)
             VALUES (?, ?, ?, ?, ?)
         """, (user["id"], post["user_id"], 2, post_id, comment_id))  # type 2 = comment
-        db.commit()
-    return redirect(url_for("view_post", post_id=post_id))
     db.commit()
     db.close()
     flash("Comment added!", "success")
+    return redirect(url_for("view_post", post_id=post_id))
 
 def get_comments_for_post(post_id):
     db = get_db()
@@ -508,10 +518,15 @@ def delete_post(post_id):
     flash("Post deleted.", "success")
     return redirect(url_for("index"))
 
-@app.route("/profile/<username>")
 @app.route("/profile/")
+@app.route("/profile/<username>")
 def profile(username=None):
-    if username == None: return redirect(url_for("login"))
+    if username is None:
+        user = current_user()
+        if not user:
+            return redirect(url_for("login"))
+        return redirect(url_for("profile", username=user["username"]))
+
     db = get_db()
     profile_user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
     if not profile_user:
@@ -520,7 +535,6 @@ def profile(username=None):
     posts = db.execute("SELECT * FROM posts WHERE user_id = ? ORDER BY timestamp DESC", (profile_user["id"],)).fetchall()
     db.close()
     return render_template("profile.html", profile=profile_user, posts=posts, user=current_user())
-
 
 @app.route("/profile/avatar", methods=["POST"])
 def change_avatar():
@@ -550,20 +564,28 @@ def uploaded_file(filename):
 @app.route("/description", methods=["POST"])
 def change_description():
     user = current_user()
-    data = request.get_json()   # get the JSON body
-    description = data.get("description")
-    print("    "+description)
+    if not user:
+        return jsonify(success=False, error="Unauthorized"), 401
+
+    data = request.get_json() or {}
+    description = (data.get("description") or "").strip()
+
+    # Basic validation
+    if len(description) > 1000:
+        return jsonify(success=False, error="Description too long (max 1000 chars)."), 400
+
     db = get_db()
     db.execute("UPDATE users SET description = ? WHERE id = ?", (description, user["id"]))
     db.commit()
     db.close()
-    return jsonify({"success": True})
+    return jsonify({"success": True, "description": description})
+
 @app.route("/notifications", methods=["GET"])
 def get_notifications():
     user = current_user()
     if not user:
         return jsonify(success=False, error="Unauthorized"), 401
-    
+
     db = get_db()
     notifications = db.execute("""
         SELECT n.id,
@@ -571,12 +593,12 @@ def get_notifications():
                n.reference_id,
                n.seen,
                n.created_at,
-               n.comment_id,
+               n.comment_id AS notif_comment_id,
                u.username AS maker_username,
                u.avatar   AS maker_avatar,
-               p.id AS post_id, 
+               p.id AS post_id,
                p.image AS post_image,
-               c.id AS comment_id,
+               c.id AS comment_row_id,
                c.text AS comment_content
         FROM notifications n
         JOIN users u ON n.maker_id = u.id
@@ -586,12 +608,13 @@ def get_notifications():
         ORDER BY n.created_at DESC
     """, (user["id"],)).fetchall()
     db.close()
+
     data = []
     for n in notifications:
         item = {
             "id": n["id"],
-            "type": n["type"],                 # 0=like,1=dislike,2=comment,3=dm
-            "reference_id": n["reference_id"], # post_id or comment_id
+            "type": n["type"],
+            "reference_id": n["reference_id"],
             "seen": bool(n["seen"]),
             "created_at": n["created_at"],
             "maker": {
@@ -603,17 +626,17 @@ def get_notifications():
                 "image": n["post_image"]
             }
         }
-        
-        # If it's a comment notification, attach comment info
+
         if n["type"] == 2:  # comment
             item["comment"] = {
-                "id": n["comment_id"],
+                "id": n["notif_comment_id"],   # the ID stored on notification row
                 "content": n["comment_content"]
             }
-        
+
         data.append(item)
-    
+
     return jsonify(success=True, notifications=data)
+
 @app.route("/notifications/<int:notif_id>/seen", methods=["POST"])
 def mark_notification_seen(notif_id):
     user = current_user()
