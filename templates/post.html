@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ post.caption }} - PhotoShare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="nav-left">
+            <a href="{{ url_for('index') }}">
+                <img src="/static/logo.png" class="Logo">
+            </a>
+        </div>
+        <div class="nav-right">
+            {% if user %}
+            <a id="UserNames" href="{{ url_for('profile', username=user.username) }}">
+                <img src="{{ url_for('static', filename=user.avatar) }}" alt="Avatar" class="avatar-lg" style="height:50px;width:auto">
+                {{ user.username }}
+            </a>
+            <a href="{{url_for('logout')}}" style="color:blue;font-family: italic;">Logout</a>
+            {% else %}
+            <a id="UserNames" href="{{ url_for('login')}}">
+                <img src="{{ url_for('static', filename='avatars/unknown.png') }}" alt="Avatar" class="avatar-lg" style="height:50px;width:auto">
+            </a>
+            <a href="{{url_for('logout')}}" class="btn btn-primary fancy-link neon">Login</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <main class="container">
+        <!-- Post -->
+        <div class="card post-card">
+            <div class="post-header">
+                <img src="{{ url_for('static', filename=post['avatar']) }}" class="avatar-sm" alt="Avatar">
+                <a href="{{ url_for('profile', username=post['username']) }}" class="username">{{ post['username'] }}</a>
+                <span class="timestamp">{{ post['timestamp'] }}</span>
+            </div>
+
+            <img src="{{ url_for('uploaded_file', filename=post['image']) }}" class="post-image">
+
+            <div class="post-body">
+                <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                    <a href="{{ url_for('uploaded_file', filename=post['image']) }}" class="fancy-link neon" style="float: right;">Fullscreen</a>
+                    <a href="{{ url_for('uploaded_file', filename=post['image']) }}" class="fancy-link neon" style="float: right;" download="Image.jpg">Download</a>
+                </div>
+                <p class="caption">{{ post['caption'] }}</p>
+                <div class="like-section">
+                    <button class="like-btn" data-id="{{ post.id }}">❤️ 
+                        <span id="like-count-{{ post.id }}">{{ like_count }}</span>
+                    </button>
+                    <button class="dislike-btn" data-id="{{ post.id }}">💔 
+                        <span id="dislike-count-{{ post.id }}">{{ dislike_count }}</span>
+                    </button>
+                    {% if not user %}
+                    <a href="/login" class="fancy-link neon">You should login to interact with posts.</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Comments Section -->
+        <div class="card comments-card">
+            <h2>Comments</h2>
+            {% for comment in comments %}
+            <div class="comment">
+                    <a href="{{ url_for('profile', username=comment['username']) }}"><img src="{{ url_for('static', filename=comment['avatar']) }}" class="avatar-sm" alt="Avatar"></a>
+                <div class="comment-body" id="comment-{{ comment['id'] }}">
+                    <a href="{{ url_for('profile', username=comment['username']) }}"><strong class="username" style="font-size: 100%">{{ comment['username'] }}</strong></a>
+                    <p class="post-text">{{ comment['text'] }}</p>
+                    <span class="timestamp">{{ comment['timestamp'] }}</span>
+                </div>
+            </div>
+            {% else %}
+            <p class="no-comments">No comments yet. Be the first to comment!</p>
+            {% endfor %}
+            {% if user %}
+            <form action="{{ url_for('add_comment', post_id=post.id) }}" method="POST" class="comment-form">
+                <textarea name="comment" placeholder="Write a comment..." required></textarea>
+                <button type="submit" class="btn-primary">Post Comment</button>
+            </form>
+            {% else %}
+            <p><a href="{{ url_for('login') }}" class="fancy-link neon">Login</a> to comment</p>
+            {% endif %}
+        </div>
+    </main>
+
+<script>
+    Post = true;
+</script>
+
+<script src="{{ url_for('static', filename='code.js') }}"></script>
+{% if user %}
+    {% include "side.html" %}
+{% endif%}
+</body>
+</html>
