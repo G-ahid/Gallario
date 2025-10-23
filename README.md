@@ -1,4 +1,4 @@
-# 📸 ImageServer - Social Media Image Sharing Platform
+# 📸 Gallario - Social Media Image Sharing Platform
 
 [![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-2.0+-green.svg)](https://flask.palletsprojects.com)
@@ -40,8 +40,8 @@ A modern, feature-rich social media platform built with Flask that allows users 
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/ImageServer.git
-   cd ImageServer
+   git clone https://github.com/yourusername/Gallario.git
+   cd Gallario
    ```
 
 2. **Create a virtual environment** (recommended)
@@ -76,8 +76,8 @@ sudo apt install python3
 sudo apt install python3-flask
 sudo apt install python3-pillow
 sudo apt install python3-werkzeug
-git clone https://github.com/yourusername/ImageServer.git
-cd ImageServer
+git clone https://github.com/yourusername/Gallario.git
+cd Gallario
 python3 app.py
 ```
 Then you can see the ip adress on the terminal, type the same thing into any other device that is also connected to the same network.
@@ -87,7 +87,7 @@ Have Python and download all the libraries from `requirements.txt` file.
 ##  Project Structure
 
 ```
-ImageServer/
+Gallario/
 ├── app.py               # Main Flask application
 ├── database.db          # SQLite database (auto-created)
 ├── requirements.txt     # Python dependencies
@@ -116,7 +116,7 @@ The application uses SQLite with the following tables:
 - **posts** - Image posts with captions
 - **likes** - User reactions (like/dislike system)
 - **comments** - Post comments
-- **notifications** - User notifications(not implemented yet)
+- **notifications** - User notifications
 - **dms** - Direct messages (future feature)
 
 ## 🔧 Configuration
@@ -150,10 +150,10 @@ options:
 6. **Stay Updated** - Check notifications for activity
 
 ### For Developers
-- **Modular Design** - Easy to extend with new features
-- **Clean Code** - Well-commented and documented
-- **Database Migrations** - Automatic schema updates
-- **Error Handling** - Graceful error management
+1. **Modular Design** - Easy to extend with new features
+2. **Clean Code** - Well-commented and documented
+3. **Database Migrations** - Automatic schema updates
+4. **Error Handling** - Graceful error management
 
 ## Development
 
@@ -208,6 +208,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Flask community for the excellent framework
 - Contributors and testers(Chatgpt and Cursor and maybe Gemini)
 - Open source libraries used in this project
+
+
+## What's next ?
+1. Add a system that pushes compressed copies of images, till you go to the specific Post.
+2. Make the Navbar and the footing in a file, and everything built around it(no copy/past)
 
 ---
 

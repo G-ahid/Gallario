@@ -1,5 +1,5 @@
 # =============================================================================
-# IMAGE SHARING APPLICATION - FLASK WEB APP
+# Gallraio - THE IMAGE SHARING APPLICATION - FLASK WEB APP
 # =============================================================================
 # This is a social media-style image sharing application built with Flask.
 # Features: User registration/login, image uploads, likes/dislikes, comments,
@@ -31,7 +31,7 @@ from PIL import Image  # Image processing (resize, crop, etc.)
 # APPLICATION CONFIGURATION
 # =============================================================================
 # Initialize Flask application
-parser = argparse.ArgumentParser(description="ImageServer - Social Media Image Sharing Platform")
+parser = argparse.ArgumentParser(description="Gallario - ImageServer - Social Media Image Sharing Platform")
 parser.add_argument("--port", type=int, default=8080, help="Port number to run on the web app.")
 parser.add_argument("--notlan", action="store_false", default=True, help="Set it to True if you want to test it on other devices that are also connected to the local network.")
 arg = parser.parse_args()
