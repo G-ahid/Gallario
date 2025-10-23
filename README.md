@@ -88,9 +88,9 @@ Have Python and download all the libraries from `requirements.txt` file.
 
 ```
 ImageServer/
-├── app.py                 # Main Flask application
-├── database.db           # SQLite database (auto-created)
-├── requirements.txt      # Python dependencies
+├── app.py               # Main Flask application
+├── database.db          # SQLite database (auto-created)
+├── requirements.txt     # Python dependencies
 ├── README.md            # This file
 ├── static/              # Static assets
 │   ├── styles.css       # Main stylesheet
