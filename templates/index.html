@@ -63,12 +63,11 @@
 
             <div class="post-body">
                 <p class="caption">{{ post['caption'] }}</p>
-
                 <div class="like-section">
-                    <button class="like-btn" data-id="{{ post.id }}" onclick="event.stopPropagation();">❤️ 
+                    <button class="like-btn" data-id="{{ post.id }}" >❤️ 
                         <span id="like-count-{{ post.id }}">{{ post.like_count }}</span>
                     </button>
-                    <button class="dislike-btn" data-id="{{ post.id }}" onclick="event.stopPropagation();">💔 
+                    <button class="dislike-btn" data-id="{{ post.id }}" >💔 
                         <span id="dislike-count-{{ post.id }}">{{ post.dislike_count }}</span>
                     </button>
                     {% if not user %}
@@ -100,31 +99,63 @@
     <!-- Like / Dislike AJAX -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const updateCounters = async (url, postId) => {
-            const res = await fetch(url, { method: 'POST' });
-            const data = await res.json();
-            if (data.success) {
-                document.getElementById(`like-count-${postId}`).textContent = data.like_count;
-                document.getElementById(`dislike-count-${postId}`).textContent = data.dislike_count;
+      async function updateCounters(url, postId) {
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          });
+
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+          const data = await res.json();
+
+          if (data.success) {
+            // Update counts
+            const likeCount = document.getElementById(`like-count-${postId}`);
+            const dislikeCount = document.getElementById(`dislike-count-${postId}`);
+
+            if (likeCount) likeCount.textContent = data.like_count ?? 0;
+            if (dislikeCount) dislikeCount.textContent = data.dislike_count ?? 0;
+
+            // Update button states visually
+            const likeBtn = document.querySelector(`.like-btn[data-id="${postId}"]`);
+            const dislikeBtn = document.querySelector(`.dislike-btn[data-id="${postId}"]`);
+
+            if (data.user_liked !== undefined) {
+              likeBtn.classList.toggle('active', data.user_liked);
             }
-        };
 
-        document.querySelectorAll('.like-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const postId = btn.getAttribute('data-id');
-                updateCounters(`/like/${postId}`, postId);
-            });
-        });
+            if (data.user_disliked !== undefined) {
+              dislikeBtn.classList.toggle('active', data.user_disliked);
+            }
+          } else {
+            console.warn('Server returned failure:', data);
+          }
+        } catch (err) {
+          console.error('Error updating counters:', err);
+        }
+      }
 
-        document.querySelectorAll('.dislike-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const postId = btn.getAttribute('data-id');
-                updateCounters(`/dislike/${postId}`, postId);
-            });
+      // Like buttons
+      document.querySelectorAll('.like-btn').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const postId = btn.dataset.id;
+          updateCounters(`/like/${postId}`, postId);
         });
+      });
+
+      // Dislike buttons
+      document.querySelectorAll('.dislike-btn').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const postId = btn.dataset.id;
+          updateCounters(`/dislike/${postId}`, postId);
+        });
+      });
     });
+
     /**
      * Front-end "time ago" updater for elements with class="timestamp".
      * - Supports formats: "YYYY-MM-DD HH:MM:SS",   "YYYY-MM-DDTHH:MM:SS(.sss)(Z|±hh:mm)", or numeric epoch.

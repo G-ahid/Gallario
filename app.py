@@ -519,9 +519,8 @@ def like(post_id):
 @app.route("/dislike/<int:post_id>", methods=["POST"])
 def dislike(post_id):
     """
-    Handle dislike functionality for posts.
-    Toggle behavior: dislike if not disliked, remove if already disliked.
-    Also handles switching between like/dislike.
+    Handle like/unlike functionality for posts.
+    Toggle behavior: like if not liked, unlike if already liked.
     Returns JSON with updated counts for AJAX updates.
     """
     # Check authentication
@@ -529,8 +528,6 @@ def dislike(post_id):
     if not user:
         return jsonify(success=False), 401
 
-    # Get reaction type from form (1=like, -1=dislike)
-    value = int(request.form.get("value", 1))
     db = get_db()
 
     # Get the post owner (for notifications)
@@ -543,26 +540,26 @@ def dislike(post_id):
                           (user["id"], post_id)).fetchone()
 
     if existing:
-        if existing["value"] == value:
-            # User already has this reaction - remove it
+        if existing["value"] == -1:
+            # User already disliked - remove the dislike (undislike)
             db.execute("DELETE FROM likes WHERE id=?", (existing["id"],))
         else:
-            # User has different reaction - switch to new one
-            db.execute("UPDATE likes SET value=? WHERE id=?", (value, existing["id"]))
-    else:
-        # First time reaction - add new reaction
-        db.execute("INSERT INTO likes (user_id, post_id, value) VALUES (?, ?, ?)", 
-                   (user["id"], post_id, value))
+            # User liked - change to dislike
+            db.execute("UPDATE likes SET value=-1 WHERE id=?", (existing["id"],))
 
-        # Send notification to post owner (if not self-reaction)
-        if value == 1 and post["user_id"] != user["id"]:
-            # Like notification
-            db.execute("""
-                INSERT INTO notifications (maker_id, receiver_id, type, reference_id)
-                VALUES (?, ?, ?, ?)
-            """, (user["id"], post["user_id"], 0, post_id))  # type 0 = like
-        elif value == -1 and post["user_id"] != user["id"]:
-            # Dislike notification
+            # Send notification to post owner (if not self-like)
+            if post["user_id"] != user["id"]:
+                db.execute("""
+                    INSERT INTO notifications (maker_id, receiver_id, type, reference_id)
+                    VALUES (?, ?, ?, ?)
+                """, (user["id"], post["user_id"], 1, post_id))  # type 1 = dislike
+    else:
+        # First time reaction - add like
+        db.execute("INSERT INTO likes (user_id, post_id, value) VALUES (?, ?, -1)", 
+                   (user["id"], post_id))
+
+        # Send notification to post owner (if not self-like)
+        if post["user_id"] != user["id"]:
             db.execute("""
                 INSERT INTO notifications (maker_id, receiver_id, type, reference_id)
                 VALUES (?, ?, ?, ?)
@@ -571,12 +568,15 @@ def dislike(post_id):
     db.commit()
 
     # Get updated reaction counts
-    like_count = db.execute("SELECT COUNT(*) FROM likes WHERE post_id=? AND value=1", (post_id,)).fetchone()[0]
-    dislike_count = db.execute("SELECT COUNT(*) FROM likes WHERE post_id=? AND value=-1", (post_id,)).fetchone()[0]
+    like_count = db.execute("SELECT COUNT(*) FROM likes WHERE post_id=? AND value=1", 
+                            (post_id,)).fetchone()[0]
+    dislike_count = db.execute("SELECT COUNT(*) FROM likes WHERE post_id=? AND value=-1", 
+                               (post_id,)).fetchone()[0]
     db.close()
 
     # Return JSON response for AJAX
     return jsonify(success=True, like_count=like_count, dislike_count=dislike_count)
+
 
 
 @app.route("/post/<int:post_id>")
