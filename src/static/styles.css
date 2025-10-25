@@ -1,0 +1,632 @@
+/* ===========================
+   Base Theme & Variables
+=========================== */
+@font-face {
+  font-family: "Biome";
+  src: url("./Biome.ttf") format("truetype");
+  font-display: swap;
+}
+
+:root {
+  --bg-dark: #121212;
+  --bg-card: #1c1c1e;
+  --bg-navbar: #1a1a1a;
+  --bg-input: #2c2c2e;
+  --bg-footer: #161616;
+
+  --text-light: #ffffff;
+  --text-muted: #a1a1a6;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --danger: #ef4444;
+
+  --radius: 14px;
+  --transition: 0.25s ease;
+
+  font-size: 16px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Biome", sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-light);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  border-radius: var(--radius);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.container {
+  width: 100%;
+  max-width: 900px;
+  margin: auto;
+  padding: 1rem;
+}
+
+/* ===========================
+   Typography
+=========================== */
+h1, h2, h3 {
+  font-weight: 600;
+}
+
+.username {
+  font-size: clamp(1rem, 4vw, 1.5rem);
+  font-weight: bold;
+  color: var(--text-light);
+}
+
+/* ===========================
+   Navbar
+=========================== */
+.navbar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
+  padding: 0 1rem;
+  background: var(--bg-navbar);
+  border-bottom: 1px solid #222;
+  z-index: 1000;
+}
+
+.nav-left, .nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.Logo {
+  height: 40px;
+}
+
+.nav-right a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: var(--radius);
+  background: transparent;
+  transition: background var(--transition);
+}
+
+.nav-right a:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.avatar-sm {
+  width: 36px;
+  height: 36px;
+  border-radius: 100%;
+  object-fit: cover;
+}
+
+/* Mobile Navbar */
+@media (max-width: 600px) {
+  /* Hide the center section to save space */
+  .nav-center {
+    display: none;
+  }
+
+  /* Navbar layout: left and right stick to edges */
+  .navbar {
+    justify-content: space-between;
+    padding: 0 0.75rem;
+    position: relative;
+  }
+
+  /* Left logo stays on the far left */
+  .nav-left {
+    position: relative;
+    flex: 1;
+    justify-content: flex-start;
+  }
+
+  /* Right user controls stay on the far right */
+  .nav-right {
+    position: relative;
+    flex: 1;
+    justify-content: flex-end;
+  }
+}
+
+
+/* ===========================
+   Cards
+=========================== */
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform var(--transition), background var(--transition);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  background: #1f1f20;
+}
+
+/* ===========================
+   Upload Form
+=========================== */
+.upload-form input[type="file"],
+.upload-form input[type="text"] {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border-radius: var(--radius);
+  background: var(--bg-input);
+  border: none;
+  color: var(--text-light);
+  font-size: 1rem;
+  transition: border var(--transition);
+}
+
+.upload-form input:focus {
+  outline: 2px solid var(--accent);
+}
+
+/* ===========================
+   Posts
+=========================== */
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.post-image {
+  width: 100%;
+  margin: 1rem 0;
+  border-radius: var(--radius);
+}
+
+.timestamp {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+.caption {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  word-wrap: break-word;
+}
+
+/* ===========================
+   Like Section
+=========================== */
+.like-section {
+  display: flex;
+  gap: 1.2rem;
+  align-items: center;
+}
+
+.like-btn,
+.dislike-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: var(--text-light);
+  transition: transform 0.1s ease, color var(--transition);
+}
+
+.like-btn:hover {
+  color: var(--accent);
+}
+
+.dislike-btn:hover {
+  color: var(--danger);
+}
+
+.like-btn:active,
+.dislike-btn:active {
+  transform: scale(1.2);
+}
+
+.comment-link {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ===========================
+   Comments
+=========================== */
+.post-text {
+  display: none; /* makes them invisible till it's loadede in javascript */
+}
+
+.comments-card h2 {
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+}
+
+.comment {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.comment-body {
+  background: #2a2a2a;
+  padding: 0.6rem;
+  border-radius: var(--radius);
+  width: 100%;
+  font-size: 0.95rem;
+}
+
+.comment-form textarea {
+  width: 100%;
+  padding: 0.6rem;
+  background: var(--bg-input);
+  border: none;
+  border-radius: var(--radius);
+  color: var(--text-light);
+  margin-bottom: 0.75rem;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background var(--transition);
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+/* ===========================
+   Footer
+=========================== */
+.footer {
+  text-align: center;
+  padding: 1rem;
+  background: var(--bg-footer);
+  border-top: 1px solid #222;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 2rem;
+}
+
+/* ===========================
+   Profile Page
+=========================== */
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.avatar-lg {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* ===========================
+   Posts Grid
+=========================== */
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 14px;
+  margin-top: 1rem;
+}
+
+.post-card-grid {
+  position: relative;
+}
+
+.post-thumb {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  transition: transform var(--transition);
+}
+
+.post-thumb:hover {
+  transform: scale(1.05);
+}
+
+/* ===========================
+   Description change, and inputs
+=========================== */
+.description-button-container {
+  align-items: right;
+  display: inline;
+  gap: 10px;           /* Space between buttons */
+  justify-content: center; /* Center them horizontally */
+  margin-top: 10px;
+}
+
+.description-div {
+  box-sizing: border-box;
+  padding: 12px 20px;
+  font-size: 1rem;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background: #1e1e1e;
+  outline: none;
+  min-height: 44px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-style: italic;
+  color: blue;
+  cursor: pointer;
+}
+#description_cancel {
+  display: none;
+}
+.description-div:hover {
+  background: #333;
+}
+
+/* Container for spacing */
+.input-group {
+  position: fixed;   /* Stay in place, even when scrolling */
+  top: 0;            /* Start at very top */
+  left: 0;           /* Start at very left */
+  margin: 0;
+  padding: 0;
+  width: 100vw;      /* Viewport width */
+  height: 60px;      /* Optional height for input */
+  box-sizing: border-box;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 0;  /* Flat edges for fullscreen */
+  background: #121212;
+  color: #fff;
+  font-size: 1rem;
+  z-index: 9999;     /* Keep it above other elements */
+  display: none;
+}
+/* ===========================
+   Avatar Upload
+=========================== */
+.avatar-form-div{
+  border: 3px solid #007bff; /* Border color and thickness */
+  border-radius: 12px;       /* Roundness of corners */
+  padding: 16px;             /* Space inside the box */
+  background: #121212;       /* Background color inside the div */
+  color: #fff;                /* Text color */
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.no-posts {
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 2rem;
+  margin: 1rem 0;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px dashed var(--text-muted);
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  box-sizing: border-box;
+}
+/* ===========================
+   Responsive Tweaks
+=========================== */
+@media (max-width: 768px) {
+  :root {
+    font-size: 15px;
+  }
+
+  .post-thumb {
+    height: 120px;
+  }
+
+  .avatar-lg {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    font-size: 14px;
+  }
+
+  .post-thumb {
+    height: 100px;
+  }
+
+  .like-section {
+    gap: 1rem;
+  }
+}
+:root{
+  --accent-1: #7b61ff;
+  --accent-2: #00d4ff;
+  --accent-3: #ff6b8a;
+  --fg: #0f1724;
+  --muted: #6b7280;
+  --duration: 420ms;
+  --underline-h: 3px;
+  --ease: cubic-bezier(.16,.84,.43,1);
+  --focus-ring: 3px;
+}
+
+/* Base reset for links */
+.fancy-link{
+  --_bg-grad: linear-gradient(90deg, var(--accent-1), var(--accent-2), var(--accent-3));
+  position: relative;
+  display: inline-block;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--fg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 140ms linear, opacity 150ms linear;
+  will-change: transform, opacity;
+  outline: none;
+  /* make room for pseudo underline */
+  padding-bottom: 0.08em;
+}
+
+/* Gradient fill + animated background shift (looks like living color) */
+.fancy-link{
+  background-image: var(--_bg-grad);
+  background-size: 200% 100%;
+  background-position: 0% 50%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: background-position var(--duration) var(--ease), text-shadow var(--duration);
+}
+
+/* Animated underline via ::after */
+.fancy-link::after{
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.18em;
+  height: var(--underline-h);
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform calc(var(--duration) / 1.3) var(--ease);
+  box-shadow: 0 4px 12px rgba(11,13,23,0.12) inset;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+/* Subtle shimmer before hover — hidden by default, animated on hover */
+.fancy-link::before{
+  content: "";
+  position: absolute;
+  left: -40%;
+  top: -30%;
+  width: 60%;
+  height: 160%;
+  transform: rotate(-20deg) translateX(-100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%);
+  filter: blur(8px);
+  opacity: 0;
+  transition: opacity 260ms linear, transform 420ms var(--ease);
+  pointer-events: none;
+}
+
+/* Hover / focus interactions */
+.fancy-link:hover,
+.fancy-link:focus{
+  transform: translateY(-2px);
+  background-position: 100% 50%;
+  text-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+.fancy-link:hover::after,
+.fancy-link:focus::after{
+  transform: scaleX(1);
+}
+.fancy-link:hover::before,
+.fancy-link:focus::before{
+  transform: rotate(-20deg) translateX(180%);
+  opacity: 1;
+}
+
+/* Keyboard focus visible (accessible) */
+.fancy-link:focus-visible{
+  box-shadow: 0 0 0 var(--focus-ring) rgba(59,130,246,0.16), 0 0 0 1px rgba(59,130,246,0.08);
+  border-radius: 6px;
+}
+
+/* ACTIVE (pressed) */
+.fancy-link:active{
+  transform: translateY(0);
+  opacity: 0.95;
+}
+
+/* Neon variant */
+.fancy-link.neon{
+  color: var(--accent-2);
+  -webkit-text-fill-color: initial; /* show the color instead of clipped gradient */
+  background-image: none;
+  text-shadow:
+    0 0 6px rgba(0,212,255,0.16),
+    0 3px 12px rgba(0,212,255,0.08),
+    0 -1px 2px rgba(255,255,255,0.02);
+}
+.fancy-link.neon::after{
+  background: radial-gradient(closest-side, rgba(0,212,255,0.45), rgba(0,212,255,0.06));
+  box-shadow: 0 6px 30px rgba(0,212,255,0.12);
+}
+.fancy-link { line-height: 1; padding: .04em .02em; }
+
+/* Replace existing .clickable style quickly */
+.clickable{ all: unset; display:inline; cursor:pointer; }
+.clickable.fancy-link{ display:inline-block; }
+
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce){
+  :root{ --duration: 120ms; }
+  .fancy-link,
+  .fancy-link::after,
+  .fancy-link::before{
+    transition: none !important;
+    animation: none !important;
+  }
+  .fancy-link::after{ transform: scaleX(1); opacity: 1; }
+  .fancy-link::before{ opacity: 0; transform: none; }
+}
+
+/* Dark-mode friendly invert (optional) */
+@media (prefers-color-scheme: dark){
+  :root{ --fg: #e6eef8; --muted: #94a3b8; }
+  .fancy-link.underline-only::after,
+  .fancy-link::after{ mix-blend-mode: screen; }
+}
+
+/* Utility: small size / large size */
+.fancy-link.small{ font-size: .85rem; }
+.fancy-link.large{ font-size: 1.1rem; }
+
+/* Extra polish: subtle hover caret (optional) */
+.fancy-link[data-caret="true"]::before{
+  width: 8%;
+  left: 0;
+  opacity: 0.85;
+  filter: blur(4px);
+}
+

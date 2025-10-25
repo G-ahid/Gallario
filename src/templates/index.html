@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gallrio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <!-- NAVBAR -->
+
+    <div class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="nav-left">
+            <a href="{{ url_for('main.index') }}">
+                <img src="/static/logo.png" class="Logo">
+            </a>
+        </div>
+        <div class="nav-right">
+            {% if user %}
+            <a id="UserNames" href="{{ url_for('main.profile', username=user.username) }}">
+                <img src="{{ url_for('static', filename=user.avatar) }}" alt="Avatar" class="avatar-lg" style="height:50px;width:auto">
+                {{ user.username }}
+            </a>
+            <a href="{{url_for('main.logout')}}" style="color:blue;font-family: italic;">Logout</a>
+            {% else %}
+            <a id="UserNames" href="{{ url_for('main.login')}}">
+                <img src="static/avatars/unknown.png" alt="Avatar" class="avatar-lg" style="height:50px;width:auto">
+            </a>
+            <a href="{{url_for('main.logout')}}" class="btn btn-primary fancy-link neon">Login</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <main class="container">
+        <!-- Upload Post -->
+        {% if user %}
+        <div class="card upload-card">
+            <form action="{{ url_for('main.upload') }}" method="POST" enctype="multipart/form-data" class="upload-form">
+                <input type="file" name="photo" accept="image/*" required>
+                <input type="text" name="caption" placeholder="Write a caption..." required>
+                <button type="submit" class="btn-primary">Upload</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="card upload-card">
+            <a href="{{ url_for('main.login') }}" class="fancy-link neon">Login to post !</a>
+        </div>
+        {% endif %}
+
+        <!-- Posts Feed -->
+        {% for post in posts %}
+        <div class="card post-card" onclick="window.location.href='{{ url_for('main.view_post', post_id=post.id) }}';" style="cursor:pointer;">
+            <div class="post-header" style="display: flex;">
+                <a href="{{ url_for('main.profile', username=post['username']) }}" class="username" onclick="event.stopPropagation();" style="display: inline-flex; align-items: center; gap: 8px;">
+                <img src="{{ url_for('static', filename=post['avatar']) }}" class="avatar-sm" alt="Avatar">
+                <span>{{ post['username'] }}</span>
+                </a>
+                <span class="timestamp">{{ post['timestamp'] }}</span>
+            </div>
+
+            <img src="{{ url_for('main.uploaded_file', filename=post['image']) }}" class="post-image" alt="Post Image">
+
+            <div class="post-body">
+                <p class="caption">{{ post['caption'] }}</p>
+                <div class="like-section">
+                    {% if user %}
+                    <button class="like-btn" data-id="{{ post.id }}" >❤️ 
+                        <span id="like-count-{{ post.id }}">{{ post.like_count }}</span>
+                    </button>
+                    <button class="dislike-btn" data-id="{{ post.id }}" >💔 
+                        <span id="dislike-count-{{ post.id }}">{{ post.dislike_count }}</span>
+                    </button>
+                    {% else %}
+                    <span id="like-count-{{ post.id }}">{{ post.like_count }} likes</span>
+                    <span id="dislike-count-{{ post.id }}">{{ post.dislike_count }} disikes</span>
+                    <a href="/login" class="fancy-link neon">You should login to interact with posts.</a>
+                    {% endif %}
+                    <a href="{{ url_for('main.view_post', post_id=post.id) }}" class="comment-link" onclick="event.stopPropagation();">
+                        💬 {{ post.comment_count }} Comments
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p class="no-posts">No posts yet. Be the first to share something!</p>
+        {% endfor %}
+        <div class="pagination" style="text-align: center;">
+          {% if page > 1 %}
+            <a href="{{ url_for('main.index', page=page-1) }}" class="fancy-link neon" style="float: left;">< -- Previous</a>
+          {% endif %}
+          <span style="color: blue">{{ page }}</span>
+          <a href="{{ url_for('main.index', page=page+1) }}" style="float: right;" class="fancy-link neon">Next -- ></a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>*Made* by Nezar Himself </p><a href="mailto:n.bahid@aui.ma" class="fancy-link neon">Contact Me</a>
+        <h6>do not post anything that you do not have permission to post.</h6>
+    </footer>
+
+    <!-- Like / Dislike AJAX -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      async function updateCounters(url, postId) {
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          });
+
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+          const data = await res.json();
+
+          if (data.success) {
+            // Update counts
+            const likeCount = document.getElementById(`like-count-${postId}`);
+            const dislikeCount = document.getElementById(`dislike-count-${postId}`);
+
+            if (likeCount) likeCount.textContent = data.like_count ?? 0;
+            if (dislikeCount) dislikeCount.textContent = data.dislike_count ?? 0;
+
+            // Update button states visually
+            const likeBtn = document.querySelector(`.like-btn[data-id="${postId}"]`);
+            const dislikeBtn = document.querySelector(`.dislike-btn[data-id="${postId}"]`);
+
+            if (data.user_liked !== undefined) {
+              likeBtn.classList.toggle('active', data.user_liked);
+            }
+
+            if (data.user_disliked !== undefined) {
+              dislikeBtn.classList.toggle('active', data.user_disliked);
+            }
+          } else {
+            console.warn('Server returned failure:', data);
+          }
+        } catch (err) {
+          console.error('Error updating counters:', err);
+        }
+      }
+
+      // Like buttons
+      document.querySelectorAll('.like-btn').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const postId = btn.dataset.id;
+          updateCounters(`/like/${postId}`, postId);
+        });
+      });
+
+      // Dislike buttons
+      document.querySelectorAll('.dislike-btn').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const postId = btn.dataset.id;
+          updateCounters(`/dislike/${postId}`, postId);
+        });
+      });
+    });
+
+    /**
+     * Front-end "time ago" updater for elements with class="timestamp".
+     * - Supports formats: "YYYY-MM-DD HH:MM:SS",   "YYYY-MM-DDTHH:MM:SS(.sss)(Z|±hh:mm)", or numeric epoch.
+     * - If your server timestamps are in UTC but lack a 'Z', set assumeUTC =   true (see note).
+     */
+    
+      const assumeUTC = true; // <-- set true if your server timestamps are UTC    but have no timezone marker
+    
+      function parseTimestamp(ts) {
+        if (!ts) return null;
+        // If it's a number (epoch seconds or ms)
+        if (!isNaN(ts)) {
+          // use numeric value; try to decide seconds vs ms (>=1e12 => ms)
+          const n = Number(ts);
+          return n > 1e12 ? new Date(n) : new Date(n * 1000);
+        }
+    
+        // Trim and normalize
+        ts = String(ts).trim();
+    
+        // If it's like "YYYY-MM-DD HH:MM:SS" -> convert to "YYYY-MM-DDTHH:MM:SS"
+        // Browsers reliably parse "YYYY-MM-DDTHH:MM:SS" as local time, and     "YYYY-MM-DDTHH:MM:SSZ" as UTC.
+        const spaceDateTime = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d+)?$/;
+        if (spaceDateTime.test(ts)) {
+          let iso = ts.replace(' ', 'T');
+          if (assumeUTC) iso += 'Z';
+          return new Date(iso);
+        }
+    
+        // If it's ISO-ish but missing Z and you want to assume UTC, add Z
+        const isoNoTZ = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?$/;
+        if (isoNoTZ.test(ts) && assumeUTC) {
+          return new Date(ts + 'Z');
+        }
+    
+        // Otherwise let Date try to parse (handles ISO with timezone)
+        const d = new Date(ts);
+        return isNaN(d.getTime()) ? null : d;
+      }
+    
+      function timeAgo(date, now = new Date()) {
+        if (!date) return '';
+        let seconds = Math.floor((now - date) / 1000);
+        if (seconds < 0) seconds = 0;
+    
+        if (seconds < 10) return 'just now';
+        if (seconds < 60) return `${seconds} second${seconds !== 1 ? 's' : ''}  ago`;
+    
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes} min${minutes !== 1 ? 's' : ''} ago`;
+    
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+    
+        const days = Math.floor(hours / 24);
+        if (days === 1) return 'yesterday';
+        if (days < 30) return `${days} day${days !== 1 ? 's' : ''} ago`;
+    
+        const months = Math.floor(days / 30);
+        if (months < 12) return `${months} month${months !== 1 ? 's' : ''} ago`;
+    
+        const years = Math.floor(months / 12);
+        return `${years} year${years !== 1 ? 's' : ''} ago`;
+      }
+    
+      function updateTimestamps() {
+        const nodes = document.querySelectorAll('.timestamp');
+        const now = new Date();
+        nodes.forEach(node => {
+          // Save original raw value in data-original if not already set
+          if (!node.dataset.original) node.dataset.original = node.textContent. trim();
+    
+          const raw = node.dataset.original;
+          const dt = parseTimestamp(raw);
+          const pretty = dt ? timeAgo(dt, now) : raw; // fall back to raw if    parse fails
+          node.textContent = pretty;
+          // keep full timestamp visible on hover
+          node.title = raw;
+        });
+      }
+    
+      // initial run
+      updateTimestamps();
+      // refresh every 60 seconds so "mins ago" stays accurate
+      setInterval(updateTimestamps, 60 * 1000);
+    
+</script>
+    </script>
+    {% if user %}
+    {% include "side.html" %}
+    {% endif%}
+</body>
+</html>

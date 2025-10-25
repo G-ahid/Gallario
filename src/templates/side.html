@@ -1,0 +1,216 @@
+<!-- side.html -->
+<div id="notif-overlay" class="notif-overlay hidden">
+  <div class="notif-panel">
+    <div class="notif-header">
+      <h2>Notifications</h2>
+      <button id="notif-close">✖</button>
+    </div>
+    <ul id="notif-list" class="notif-list">
+      <!-- JS will insert notifications -->
+    </ul>
+  </div>
+</div>
+
+<button id="notif-open" class="notif-button">🔔</button>
+
+<style>
+/* Overlay background */
+.notif-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 1000;
+  transition: opacity 0.3s ease;
+}
+.notif-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Sliding panel */
+.notif-panel {
+  background: #fff;
+  width: 80%;
+  max-width: 400px;
+  height: 100%;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+.notif-overlay:not(.hidden) .notif-panel {
+  transform: translateX(0);
+}
+
+/* Header */
+.notif-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: #222;
+  color: #fff;
+}
+.notif-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.notif-header button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+/* Notification list */
+.notif-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+.notif-list li {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+}
+.notif-list li img {
+  border-radius: 50%;
+  margin-right: 10px;
+}
+.notif-list li span {
+  font-size: 0.9rem;
+}
+
+/* Floating bell button */
+.notif-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #222;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 50px; height: 50px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 1100;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const openBtn = document.getElementById("notif-open");
+  const overlay = document.getElementById("notif-overlay");
+  const closeBtn = document.getElementById("notif-close");
+  const notifList = document.getElementById("notif-list");
+  newNotification = false;
+
+  // Open panel
+  openBtn.addEventListener("click", async () => {
+    overlay.classList.remove("hidden");
+    // Fetch latest notifications
+    let res = await fetch("/notifications");
+    let data = await res.json();
+    notifList.innerHTML = "";
+
+    if (data.success && data.notifications.length > 0) {
+      data.notifications.forEach(n => {
+        let li = document.createElement("li");
+
+        // safe comment text
+        const commentText = (n.type === 2 && n.comment && n.comment.content) ? `commented "${n.comment.content}" on your post` : 
+                            (n.type === 2 ? "commented on your post" : 
+                            n.type === 0 ? "liked your post" :
+                            n.type === 1 ? "disliked your post" :
+                            "sent you a notification");
+
+        // Base HTML: add data-notif-id to the post link and a dedicated class 'notif-post-link'
+        li.innerHTML = `
+          <img src="/static/${n.maker && n.maker.avatar ? n.maker.avatar : 'default.png'}" alt="avatar" width="40" height="40">
+          <span style="color: black;">
+            <a href="/profile/${n.maker ? n.maker.username : '#'}"><strong>${n.maker ? n.maker.username : 'Someone'}</strong></a>
+            <a href="/post/${n.post ? n.post.id : '#'}${n.type === 2 ? `#comment-${n.comment.id}` : ''}" 
+               class="notif-post-link ${!n.seen ? 'fancy-link neon' : ''}" 
+               data-notif-id="${n.id}">
+              ${commentText}
+            </a>
+            <br>
+            <small class="timestamp">${n.created_at}</small>
+          </span>
+        `;
+
+        // Attach click handler to the post link so clicking marks the notification seen then navigates
+        // Use event listener after element is created and appended (or before append is fine too)
+        // but we need to query inside the li
+        const postLink = li.querySelector('.notif-post-link');
+
+        if (postLink) {
+          postLink.addEventListener('click', async function (e) {
+            e.preventDefault();
+
+            // optimistic UI update: remove styling immediately
+            if (!n.seen) {
+              postLink.classList.remove('fancy-link', 'neon');
+              newNotification = true;
+            }
+
+            // send request to mark as seen; ignore failures but log them
+            const notifId = this.dataset.notifId;
+            try {
+              // adjust method/headers if you use CSRF tokens
+              await fetch(`/notifications/${notifId}/seen`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({}) // body not required, but helps some frameworks
+              });
+              // mark locally so next clicks won't re-fire update
+              n.seen = true;
+            } catch (err) {
+              console.error('Failed to mark notification seen', err);
+              // If you prefer, revert the UI change on failure:
+              // postLink.classList.add('fancy-link','neon');
+            }
+
+            // Finally navigate to the post
+            window.location.href = this.href;
+          });
+        }
+
+        notifList.appendChild(li);
+      });
+
+      updateTimestamps();
+    } else {
+      notifList.innerHTML = "<li><span style='color:black'>No notifications... yet</span></li>";
+    }
+  });
+
+  // Close panel
+  closeBtn.addEventListener("click", () => {
+    overlay.classList.add("hidden");
+  });
+
+  // Close if clicking outside panel
+  overlay.addEventListener("click", e => {
+    if (e.target === overlay) {
+      overlay.classList.add("hidden");
+    }
+  });
+  if (newNotification) {
+    openBtn.style = "position: fixed;bottom: 20px;right: 20px;background: #222;color: #fff;border: none;border-radius: 50%;width: 50px;height: 50px;font-size: 1.5rem;cursor: pointer;z-index: 1100;box-shadow: 0 0 0 4px red, 0 4px 8px rgba(0, 0, 0, 0.3);"
+  }
+});
+</script>
+
+</script>
