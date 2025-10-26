@@ -1,5 +1,8 @@
-import sqlite3
-from src.Config import DB_PATH
+import argparse               # Argument passing through terminal
+import os                     # File system operations
+import sqlite3                # Database operations
+import uuid                   # Generate unique identifiers
+from datetime import datetime # Date/time handling
 
 # Flask framework imports
 from flask import (
@@ -7,6 +10,12 @@ from flask import (
     session, send_from_directory, jsonify, flash, abort, Blueprint
 )
 
+# Security and file handling imports
+from werkzeug.security import generate_password_hash, check_password_hash  # Password hashing
+from werkzeug.utils import secure_filename  # Secure file name handling
+from PIL import Image  # Image processing (resize, crop, etc.)
+
+from src.Config import *
 
 # =============================================================================
 # DATABASE HELPER FUNCTIONS

@@ -12,7 +12,7 @@
     <div class="navbar">
         <!-- Left: Logo -->
         <div class="nav-left">
-            <a href="{{ url_for('index') }}">
+            <a href="{{ url_for('main.index') }}">
                 <img src="/static/logo.png" class="Logo">
                 </img>
             </a>
@@ -21,11 +21,11 @@
     
         <!-- Right: Profile + Logout -->
         <div class="nav-right">
-            <a href="{{ url_for('profile', username=user.username) }}">
+            <a href="{{ url_for('main.profile', username=user.username) }}">
                 <img src="{{ url_for('static', filename=user['avatar']) }}" class="avatar-lg" alt="Avatar" style="height:50px;width:auto">
                 {{ user.username }}
             </a>
-            <a href="{{ url_for('logout') }}">Logout</a>
+            <a href="{{ url_for('main.logout') }}">Logout</a>
         </div>
     </div>
 
@@ -45,7 +45,7 @@
             </div>
 
             <div class="avatar-form-div">
-            <form action="{{ url_for('change_avatar') }}" method="POST" enctype="multipart/form-data" class="avatar-form">
+            <form action="{{ url_for('main.change_avatar') }}" method="POST" enctype="multipart/form-data" class="avatar-form">
                 <input type="file" name="avatar" accept="image/*" required>
                 <button type="submit" class="btn-primary">Change Avatar</button>
             </form>

@@ -56,8 +56,8 @@
                         <span id="dislike-count-{{ post.id }}">{{ dislike_count }}</span>
                     </button>
                     {% else %}
-                    <span id="like-count-{{ post.id }}">{{ post.like_count }} likes</span>
-                    <span id="dislike-count-{{ post.id }}">{{ post.dislike_count }} disikes</span>
+                    <span id="like-count-{{ post.id }}">{{ like_count }} likes</span>
+                    <span id="dislike-count-{{ post.id }}">{{ dislike_count }} disikes</span>
                     <a href="/login" class="fancy-link neon">You should login to interact with posts.</a>
                     {% endif %}
                 </div>
