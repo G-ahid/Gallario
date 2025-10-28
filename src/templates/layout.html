@@ -43,7 +43,7 @@
         </div>
         <div class="nav-right">
             {% if user %}
-            <a id="UserNames" href="{{ url_for('profile', username=user.username) }}">
+            <a id="UserNames" href="{{ url_for('main.profile', username=user.username) }}">
                 <img src="{{ url_for('static', filename=user.avatar) }}" alt="Avatar" class="avatar-lg" style="height:50px;width:auto">
                 {{ user.username }}
             </a>

@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 shortenText();
 function shortenText() {
-  const maxLength = 100; // number of characters to show initially
+  const maxLength = 80; // number of characters to show initially
   posts = document.querySelectorAll('.post-text');
 
   posts.forEach(post => {
@@ -25,7 +25,7 @@ function shortenText() {
 
       const readMore = document.createElement('span');
       readMore.className = 'read-more';
-      readMore.textContent = '[Read More]';
+      readMore.textContent = '\n[Read More]';
       readMore.style.color = "blue";
 	  readMore.style.cursor = "pointer";
 	  readMore.addEventListener("mouseover", () => {
@@ -43,7 +43,7 @@ function shortenText() {
         } else {
           fullSpan.style.display = 'none';
           shortSpan.style.display = 'inline';
-          readMore.textContent = '[Read More]';
+          readMore.textContent = '\n[Read More]';
         }
 		
       });
@@ -202,3 +202,19 @@ document.querySelector("body > main > div.card.profile-header > h4").addEventLis
         document.getElementById("description_button").click(); // trigger the click
     }
 });
+// deleting a post
+function deletePost(postId, shouldConfirm = true) {
+  if (shouldConfirm) {
+    if (!confirm("Do you want to continue with deleting this post? (This cannot be undone)")) {
+      return; // user canceled
+    }
+  }
+
+  // Create a form dynamically to send POST request
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = `/delete/${postId}`;  // matches your backend route
+
+  document.body.appendChild(form);
+  form.submit();
+}

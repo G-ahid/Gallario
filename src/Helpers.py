@@ -1,17 +1,12 @@
-import argparse               # Argument passing through terminal
 import os                     # File system operations
 import sqlite3                # Database operations
 import uuid                   # Generate unique identifiers
 from datetime import datetime # Date/time handling
 
 # Flask framework imports
-from flask import (
-    Flask, render_template, request, redirect, url_for,
-    session, send_from_directory, jsonify, flash, abort, Blueprint
-)
+from flask import session
 
 # Security and file handling imports
-from werkzeug.security import generate_password_hash, check_password_hash  # Password hashing
 from werkzeug.utils import secure_filename  # Secure file name handling
 from PIL import Image  # Image processing (resize, crop, etc.)
 

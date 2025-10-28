@@ -1,13 +1,10 @@
-import argparse               # Argument passing through terminal
-import os                     # File system operations
 import sqlite3                # Database operations
-import uuid                   # Generate unique identifiers
 from datetime import datetime # Date/time handling
 
 # Flask framework imports
 from flask import (
-    Flask, render_template, request, redirect, url_for,
-    session, send_from_directory, jsonify, flash, abort, Blueprint
+    render_template, request, redirect, url_for,
+    session, send_from_directory, jsonify, flash, Blueprint
 )
 
 # Security and file handling imports
