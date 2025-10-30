@@ -30,6 +30,9 @@ def index():
     """
     db = get_db()
     user_id = session.get("user_id")
+    #Sort by arg
+    sortby = request.args.get("sortby", "time")
+    accending = int(request.args.get("accending", 1))
 
     # Pagination setup
     page = int(request.args.get("page", 1))
@@ -109,7 +112,7 @@ def register():
         # Validate required fields
         if username == "" or password_raw == "":
             flash("Username and password required.", "error")
-            return redirect(url_for("register"))
+            return redirect(url_for("main.register"))
 
         # Process avatar if provided
         avatar_path = save_avatar_file(avatar_file) if avatar_file else None
@@ -131,7 +134,7 @@ def register():
             # Username already exists
             db.close()
             flash("Username already taken.", "error")
-            return redirect(url_for("register"))
+            return redirect(url_for("main.register"))
 
     # Show registration form (GET request or failed POST)
     return render_template("login.html", register=True, user=current_user())
@@ -361,7 +364,7 @@ def add_comment(post_id):
     text = request.form.get("comment", "").strip()
     if text == "":
         flash("Comment cannot be empty.", "error")
-        return redirect(url_for("view_post", post_id=post_id))
+        return redirect(url_for("main.view_post", post_id=post_id))
         
     # Save comment to database
     db = get_db()
@@ -382,7 +385,7 @@ def add_comment(post_id):
     db.commit()
     db.close()
     flash("Comment added!", "success")
-    return redirect(url_for("view_post", post_id=post_id))
+    return redirect(url_for("main.view_post", post_id=post_id))
 
 def get_comments_for_post(post_id):
     """
@@ -457,7 +460,7 @@ def profile(username=None):
         user = current_user()
         if not user:
             return redirect(url_for("main.login"))
-        return redirect(url_for("profile", username=user["username"]))
+        return redirect(url_for("main.profile", username=user["username"]))
 
     db = get_db()
     
@@ -488,13 +491,13 @@ def change_avatar():
     avatar_file = request.files.get("avatar")
     if not avatar_file or avatar_file.filename == "":
         flash("No file selected.", "error")
-        return redirect(url_for("profile", username=user["username"]))
+        return redirect(url_for("main.profile", username=user["username"]))
     
     # Process and save the avatar
     avatar_path = save_avatar_file(avatar_file)
     if not avatar_path:
         flash("Invalid avatar file.", "error")
-        return redirect(url_for("profile", username=user["username"]))
+        return redirect(url_for("main.profile", username=user["username"]))
     
     # Update user's avatar in database
     db = get_db()
@@ -503,7 +506,7 @@ def change_avatar():
     db.close()
     
     flash("Avatar updated!", "success")
-    return redirect(url_for("profile", username=user["username"]))
+    return redirect(url_for("main.profile", username=user["username"]))
 
 @main_bp.route("/uploads/<filename>")
 def uploaded_file(filename):

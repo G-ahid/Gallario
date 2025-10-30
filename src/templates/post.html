@@ -33,6 +33,7 @@
     <main class="container">
         <!-- Post -->
         <div class="card post-card">
+            
             <div class="post-header">
                 <img src="{{ url_for('static', filename=post['avatar']) }}" class="avatar-sm" alt="Avatar">
                 <a href="{{ url_for('main.profile', username=post['username']) }}" class="username">{{ post['username'] }}</a>
@@ -44,7 +45,10 @@
             <div class="post-body">
                 <div style="display: flex; justify-content: flex-end; gap: 12px;">
                     <a href="{{ url_for('main.uploaded_file', filename=post['image']) }}" class="fancy-link neon" style="float: right;">Fullscreen</a>
-                    <a href="{{ url_for('main.uploaded_file', filename=post['image']) }}" class="fancy-link neon" style="float: right;" download="Image.jpg">Download</a>
+                    <a href="{{ url_for('main.uploaded_file', filename=post['image']) }}" class="fancy-link neon"  download="Image.jpg">Download</a>
+                    {% if user and user['id'] == post['user_id'] %}
+                    <a href="#" onclick='deletePost("{{post.id}}"); return false' class="fancy-link neon" style="float: right; color: red;">Delete post</a>
+                    {% endif %}
                 </div>
                 <p class="caption">{{ post['caption'] }}</p>
                 <div class="like-section">
@@ -95,8 +99,9 @@
 </script>
 
 <script src="{{ url_for('static', filename='code.js') }}"></script>
+<script src="{{ url_for('static', filename='post_index.js') }}"></script>
 {% if user %}
-    {% include "side.html" %}
+    {% include "side.html" %}s
 {% endif%}
 </body>
 </html>

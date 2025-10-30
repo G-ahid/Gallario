@@ -256,7 +256,7 @@ h1, h2, h3 {
    Comments
 =========================== */
 .post-text {
-  display: none; /* makes them invisible till it's loadede in javascript */
+  display: none; /* makes them invisible till it's loaded in javascript */
 }
 
 .comments-card h2 {

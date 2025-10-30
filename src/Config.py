@@ -21,7 +21,7 @@ app = Flask(__name__)
 app.secret_key = "F18029BD1E955FB23095506A7223710A90B5F43E1F57442EB3ECC8D704B8554D"
 
 # Get the directory where this script is located
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)+"src")
 
 # Define folder paths for file storage
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")  # User uploaded images
