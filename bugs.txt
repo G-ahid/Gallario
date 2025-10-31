@@ -1,1 +1,2 @@
 - description does not work(mobile).
+- the x on profiles should only be shown when you're looking at your own profile
